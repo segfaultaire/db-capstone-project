@@ -46,33 +46,12 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `LittleLemonDB`.`MenuItems`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `LittleLemonDB`.`MenuItems` (
-  `MenuItemID` INT NOT NULL,
-  `CourseName` VARCHAR(45) NOT NULL,
-  `StarterName` VARCHAR(45) NOT NULL,
-  `DessertName` VARCHAR(45) NULL,
-  `DrinkName` VARCHAR(45) NULL,
-  PRIMARY KEY (`MenuItemID`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `LittleLemonDB`.`Menus`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `LittleLemonDB`.`Menus` (
   `MenuID` INT NOT NULL,
   `Cuisine` VARCHAR(45) NOT NULL,
-  `Type` VARCHAR(45) NOT NULL,
-  `MenuItemsID` INT NOT NULL,
-  PRIMARY KEY (`MenuID`),
-  INDEX `fk_Menus_MenuItemsID_idx` (`MenuItemsID` ASC) VISIBLE,
-  CONSTRAINT `fk_Menus_MenuItemsID`
-    FOREIGN KEY (`MenuItemsID`)
-    REFERENCES `LittleLemonDB`.`MenuItems` (`MenuItemID`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  PRIMARY KEY (`MenuID`))
 ENGINE = InnoDB;
 
 
@@ -90,23 +69,35 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `LittleLemonDB`.`OrderDeliveryStatus`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `LittleLemonDB`.`OrderDeliveryStatus` (
+  `OrderDeliveryStatusID` INT NOT NULL,
+  `Status` VARCHAR(10) NOT NULL,
+  `Date` DATETIME NOT NULL,
+  PRIMARY KEY (`OrderDeliveryStatusID`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `LittleLemonDB`.`Orders`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `LittleLemonDB`.`Orders` (
   `OrderID` INT NOT NULL,
-  `CustomerID` INT NOT NULL,
+  `BookingID` INT NOT NULL,
   `MenuID` INT NOT NULL,
+  `OrderDeliveryStatusID` INT NOT NULL,
   `WaiterID` INT NOT NULL,
   `TotalCost` DECIMAL NOT NULL,
   `Quantity` INT NULL DEFAULT 1,
-  `IsToGo` TINYINT NULL DEFAULT 0,
   PRIMARY KEY (`OrderID`),
-  INDEX `fk_Orders_CustomerID_idx` (`CustomerID` ASC) VISIBLE,
   INDEX `fk_Orders_MenuID_idx` (`MenuID` ASC) VISIBLE,
   INDEX `fk_Orders_WaiterID_idx` (`WaiterID` ASC) VISIBLE,
-  CONSTRAINT `fk_Orders_CustomerID`
-    FOREIGN KEY (`CustomerID`)
-    REFERENCES `LittleLemonDB`.`CustomerDetails` (`CustomerID`)
+  INDEX `fk_Orders_StatusID_idx` (`OrderDeliveryStatusID` ASC) VISIBLE,
+  INDEX `fk_Orders_BookingID_idx` (`BookingID` ASC) VISIBLE,
+  CONSTRAINT `fk_Orders_BookingID`
+    FOREIGN KEY (`BookingID`)
+    REFERENCES `LittleLemonDB`.`Bookings` (`BookingID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Orders_MenuID`
@@ -118,21 +109,29 @@ CREATE TABLE IF NOT EXISTS `LittleLemonDB`.`Orders` (
     FOREIGN KEY (`WaiterID`)
     REFERENCES `LittleLemonDB`.`Staff` (`StaffID`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Orders_StatusID`
+    FOREIGN KEY (`OrderDeliveryStatusID`)
+    REFERENCES `LittleLemonDB`.`OrderDeliveryStatus` (`OrderDeliveryStatusID`)
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `LittleLemonDB`.`OrderDeliveryStatus`
+-- Table `LittleLemonDB`.`MenuItems`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `LittleLemonDB`.`OrderDeliveryStatus` (
-  `OrderID` INT NOT NULL,
-  `Status` VARCHAR(10) NOT NULL,
-  `Date` DATE NOT NULL,
-  INDEX `fk_OrderDeliveryStatus_OrderID_idx` (`OrderID` ASC) VISIBLE,
-  CONSTRAINT `fk_OrderDeliveryStatus_OrderID`
-    FOREIGN KEY (`OrderID`)
-    REFERENCES `LittleLemonDB`.`Orders` (`OrderID`)
+CREATE TABLE IF NOT EXISTS `LittleLemonDB`.`MenuItems` (
+  `MenuItemID` INT NOT NULL,
+  `Name` VARCHAR(45) NOT NULL,
+  `Type` VARCHAR(45) NOT NULL,
+  `Price` DECIMAL NOT NULL,
+  `MenuID` INT NOT NULL,
+  PRIMARY KEY (`MenuItemID`),
+  INDEX `fk_MenuItems_MenuID_idx` (`MenuID` ASC) VISIBLE,
+  CONSTRAINT `fk_MenuItems_MenuID`
+    FOREIGN KEY (`MenuID`)
+    REFERENCES `LittleLemonDB`.`Menus` (`MenuID`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
